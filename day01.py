@@ -13,7 +13,7 @@ def main() -> None:
     list2: tuple[str]
 
     # populate lists
-    with open(R"day01_input.txt", newline="") as f:
+    with open(R"fstorino/advent_2024/day01_input.txt", newline="") as f:
         list1, list2 = zip(*(line.split() for line in f))
 
     part1(list1, list2)
