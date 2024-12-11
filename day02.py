@@ -6,6 +6,8 @@ https://adventofcode.com/2024/day/2
 import locale
 import itertools as it
 
+INPUT_FILE = R"fstorino/advent_2024/day02_input.txt"
+
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
 def main() -> None:
@@ -16,7 +18,7 @@ def part1() -> None:
     numbers: list[str]
     count: int = 0
 
-    with open(R"fstorino/advent_2024/day02_input.txt", newline="") as f:
+    with open(INPUT_FILE, newline="") as f:
         for line in f:
             numbers = line.split()
             if is_safe(numbers): count += 1
@@ -27,7 +29,7 @@ def part2() -> None:
     numbers: list[str]
     count: int = 0
 
-    with open(R"C:\Users\fstorino\Downloads\day02_input.txt", newline="") as f:
+    with open(INPUT_FILE, newline="") as f:
         for line in f:
             numbers = line.split()
             if is_safe(numbers):
