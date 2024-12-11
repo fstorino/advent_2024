@@ -31,7 +31,7 @@ def part2() -> None:
     pattern: str = r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)"
     ignore_next: bool = False
 
-    with open(R"C:\Users\fstorino\Downloads\day03_input.txt", newline="") as f:
+    with open(R"fstorino/advent_2024/day03_input.txt", newline="") as f:
         string = f.read()
         for operation in re.finditer(pattern, string):
             if operation.group() == "don't()":
