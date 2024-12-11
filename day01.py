@@ -4,7 +4,6 @@ Day 1
 https://adventofcode.com/2024/day/1
 """
 import locale
-from urllib import request
 
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
