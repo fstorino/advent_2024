@@ -16,7 +16,7 @@ def part1() -> None:
     numbers: list[str]
     count: int = 0
 
-    with open(R"C:\Users\fstorino\Downloads\day02_input.txt", newline="") as f:
+    with open(R"fstorino/advent_2024/day02_input.txt", newline="") as f:
         for line in f:
             numbers = line.split()
             if is_safe(numbers): count += 1
