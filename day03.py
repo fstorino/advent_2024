@@ -17,7 +17,7 @@ def part1() -> None:
     result: int = 0
     pattern: str = r"mul\((\d{1,3}),(\d{1,3})\)"
 
-    with open(R"C:\Users\fstorino\Downloads\day03_input.txt", newline="") as f:
+    with open(R"fstorino/advent_2024/day03_input.txt", newline="") as f:
         string = f.read()
         for operation in re.finditer(pattern, string):
             x, y = (int(_) for _ in operation.groups())
