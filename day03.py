@@ -6,6 +6,8 @@ https://adventofcode.com/2024/day/3
 import locale
 import re
 
+INPUT_FILE = R"fstorino/advent_2024/day03_input.txt"
+
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
 def main() -> None:
@@ -17,7 +19,7 @@ def part1() -> None:
     result: int = 0
     pattern: str = r"mul\((\d{1,3}),(\d{1,3})\)"
 
-    with open(R"fstorino/advent_2024/day03_input.txt", newline="") as f:
+    with open(INPUT_FILE, newline="") as f:
         string = f.read()
         for operation in re.finditer(pattern, string):
             x, y = (int(_) for _ in operation.groups())
@@ -31,7 +33,7 @@ def part2() -> None:
     pattern: str = r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)"
     ignore_next: bool = False
 
-    with open(R"fstorino/advent_2024/day03_input.txt", newline="") as f:
+    with open(INPUT_FILE, newline="") as f:
         string = f.read()
         for operation in re.finditer(pattern, string):
             if operation.group() == "don't()":
