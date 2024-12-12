@@ -4,29 +4,28 @@ Day 4
 https://adventofcode.com/2024/day/4
 """
 import locale
-import re
+import os
 
-INPUT_FILE = R"C:\Users\fstorino\Downloads\day04_input.txt"
+INPUT_FILE = os.path.join(os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__))), 
+    "day04_input.txt")
 
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
 def main() -> None:
-    part1()
-    part2()
+    word_search: str
+    char_grid: tuple[tuple[str]]
 
-def part1() -> None:
-    word_search: str = """
-....XXMAS.
-.SAMXMS...
-...S..A...
-..A.A.MS.X
-XMASAMX.MM
-X.....XA.A
-S.S.S.S.SS
-.A.A.A.A.A
-..M.M.M.MM
-.X.X.XMASX
-        """.strip()
+    # lê o input
+    with open(INPUT_FILE, newline="") as f:
+        word_search = f.read()
+    
+    char_grid = tuple(tuple(linha) for linha in word_search.splitlines())
+    
+    part1(char_grid)
+    part2(char_grid)
+
+def part1(char_grid: tuple[tuple[str]]) -> None:
     word: str = "XMAS"
     direções: dict = {
         "horizontal":         {"x_step": 1,  "y_step": 0},
@@ -38,33 +37,46 @@ S.S.S.S.SS
         "diag_dir":           {"x_step": -1, "y_step": 1},
         "diag_dir_reverso":   {"x_step": 1,  "y_step": -1}
         }
-    
-    char_grid: tuple[tuple[str]] = tuple(tuple(linha) for linha in word_search.splitlines())
+    count: int = 0
     y_max: int = len(char_grid)
     x_max: int = len(char_grid[0])
+
+    print(f"Procurando a palavra '{word}' num grid {x_max}x{y_max}...", end="", flush=True)
     for y in range(y_max):
         for x in range(x_max):
             for direção in direções:
-                if word == get_word(word, char_grid, x, y, direção["x_step"], direção["y_step"]):
-                    print(f"'{word}' encontrado na posição ({x},{y}) {direção}")
+                grid_word = get_word(word, char_grid, x, y, direções[direção]["x_step"], direções[direção]["y_step"])
+                if word == grid_word:
+                    count += 1
+    print("OK\n")
+    print(f"Palavras '{word}' encontradas: {count:n} ({count})")
     
 def get_word(word: str, char_grid: tuple[tuple[str]], x: int, y: int, x_step: int, y_step: int) -> str:
-    x_length = (x + len(word) - 1) * x_step
-    y_length = (y + len(word) - 1) * y_step
+    x_stop = x + x_step * (len(word) - 1)
+    y_stop = y + y_step * (len(word) - 1)
     y_max: int = len(char_grid)
     x_max: int = len(char_grid[0])
     grid_word: str = ""
     
-    if x_length > x_max: return ""
-    if y_length > y_max: return ""
+    # retorna "" se fora dos limites do grid
+    if (x_stop >= x_max) or (x_stop < 0): return ""
+    if (y_stop >= y_max) or (y_stop < 0): return ""
     
-    # fazer os skips corretos com base em x_skip e y_skip
-    for lin in range(y, y_length, y_step):
-        for col in range(x, x_length, x_step):
-            grid_word += char_grid[lin][col]
+    # retorna a palavra na direção desejada
+    for _ in range(len(word)):
+        try:
+            grid_word += char_grid[y][x]
+        except:
+            print(f"\nTentei char_grid[{y}][{x}]\n")
+            grid_word += "?"
+        x += x_step
+        y += y_step
     return grid_word
 
-def part2() -> None:
+def part2(char_grid: str) -> None:
+    count: int = 0
+    y_max: int = len(char_grid)
+    x_max: int = len(char_grid[0])
     ...
 
 if __name__ == "__main__":
