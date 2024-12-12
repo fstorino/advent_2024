@@ -5,8 +5,11 @@ https://adventofcode.com/2024/day/2
 """
 import locale
 import itertools as it
+import os
 
-INPUT_FILE = R"fstorino/advent_2024/day02_input.txt"
+INPUT_FILE = os.path.join(os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__))), 
+    "day02_input.txt")
 
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
