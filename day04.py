@@ -64,11 +64,7 @@ def get_word(word: str, char_grid: tuple[tuple[str]], x: int, y: int, x_step: in
     
     # retorna a palavra na direção desejada
     for _ in range(len(word)):
-        try:
-            grid_word += char_grid[y][x]
-        except:
-            print(f"\nTentei char_grid[{y}][{x}]\n")
-            grid_word += "?"
+        grid_word += char_grid[y][x]
         x += x_step
         y += y_step
     return grid_word
