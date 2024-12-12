@@ -4,6 +4,11 @@ Day 1
 https://adventofcode.com/2024/day/1
 """
 import locale
+import os
+
+INPUT_FILE = os.path.join(os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__))), 
+    "day01_input.txt")
 
 locale.setlocale(locale.LC_ALL, 'pt_BR')
 
@@ -12,7 +17,7 @@ def main() -> None:
     list2: tuple[str]
 
     # populate lists
-    with open(R"fstorino/advent_2024/day01_input.txt", newline="") as f:
+    with open(INPUT_FILE, newline="") as f:
         list1, list2 = zip(*(line.split() for line in f))
 
     part1(list1, list2)
