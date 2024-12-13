@@ -5,7 +5,6 @@ https://adventofcode.com/2024/day/4
 """
 import locale
 import os
-from pprint import pprint
 
 INPUT_FILE = os.path.join(os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__))), 
