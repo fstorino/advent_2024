@@ -6,28 +6,26 @@ https://adventofcode.com/2024/day/6
 import locale
 import os
 import itertools as it
+from math import log10, floor
 
 INPUT_FILE = os.path.join(os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__))), 
-    "day05_input.txt")
+    "day06_input.txt")
 
-locale.setlocale(locale.LC_ALL, 'pt_BR')
+locale.setlocale(locale.LC_ALL, "pt_BR")
 
 def main() -> None:
-    rules: list[list[int, int]] = []
-    updates: list[list[int]] = []
     result_part1: int
     result_part2: int
     
     # lê o input e gera a lista de regras (rules) e a lista de atualizações (updates)
     with open(INPUT_FILE) as f:
-        for line in f.readlines():
-            line = line.strip()
-            if "|" in line:
-                rules.append(list(map(int, line.split("|"))))
-            elif line:
-                updates.append(list(map(int, line.split(","))))
+        map = Map(f.read().splitlines())
     
+    part1(map)
+
+    return
+
     print()
     print(f"Regras:  {YELLOW}{len(rules):n}{RESET}")
     print(f"Updates: {YELLOW}{len(updates):n}{RESET}\n")
@@ -38,46 +36,167 @@ def main() -> None:
     result_part2 = part2(updates, rules)
     print(f"Soma incorretos: {BOLD}{GREEN}{result_part2:n}{RESET} ({result_part2})")   
 
-def part1(updates: list[list[int]], rules: list[list[int, int]]) -> int:
+class Map():
+    def __init__(self, input: list[str]) -> None:
+        """
+        Create a Map object
+        """
+        self.map = [list(_) for _ in input]
+        # initialize variables
+        self.x: int; self.y: int
+        self.guard_pos: tuple[int, int]
+        self.__directions = "<^>v"
+        self.__movements = {
+        "<": {"x_step": -1,
+              "y_step": 0,
+              "direction": "esquerda"},
+        "^": {"x_step": 0,
+              "y_step": -1,
+              "direction": "cima"},
+        ">": {"x_step": 1,
+              "y_step": 0,
+              "direction": "direita"},
+        "v": {"x_step": 0,
+              "y_step": 1,
+              "direction": "baixo"}}
+        # set properties
+        self.width: int = len(self.map[0])
+        self.height: int = len(self.map)
+        self.x, self.y = self.guard_pos = self.find_guard()
+        self.cursor: str = ""
+        self.update_movement()
+
+    def update_movement(self):
+        if not self.cursor: # inicializa as variáveis de cursor
+            self.cursor = self.map[self.y][self.x]
+            self.__cursor = it.islice(it.cycle(self.__directions), 
+                                      self.__directions.index(self.cursor),
+                                      None)
+        self.direction: str = self.__movements[self.cursor]["direction"]
+        self.__x_step: int = self.__movements[self.cursor]["x_step"]
+        self.__y_step: int = self.__movements[self.cursor]["y_step"]
+
+    def print(self):
+        """
+        Print the map
+        """
+        x_offset: int = floor(log10(self.height)) + 1
+
+        def x_header() -> list[str]:
+            """
+            Return the horizontal headers
+            """
+            # orders of magnitude
+            orders = floor(log10(self.width)) + 1
+            lines: list[str] = [list() for _ in range(orders)]
+            
+            for number in range(self.width):
+                text = str(number).rjust(orders)
+                for order in range(orders):
+                    lines[order] += text[order]
+
+            for idx, line in enumerate(lines):
+                lines[idx] = "".join(line)
+
+            return lines
+
+        def y_header() -> list[str]:
+            """
+            Return the vertical headers
+            """
+            nonlocal x_offset
+            # orders of magnitude
+            orders = x_offset
+            lines: list[str] = [str(number).rjust(orders) 
+                                for number in range(self.height)]
+            
+            return lines
+
+        def color(text: str) -> str:
+            colored_text = ""
+            for char in text:
+                match char:
+                    case "#":
+                        color = f"{RED}"
+                    case _ if char in self.__directions:
+                        color = f"{GREEN}"
+                    case _:
+                        color = ""
+                colored_text += f"{color}{char}{RESET}"
+            return colored_text
+
+        # print x_header
+        for header in x_header():
+            print(f"{" " * x_offset}{YELLOW}{header}{RESET}")
+        # print y_header + map
+        for header, line in zip(y_header(), self.map):
+            print(f"{YELLOW}{header}{RESET}{color(line)}")
+
+    def find_guard(self) -> tuple[int, int]:
+        """
+        Find the guard and return their (x, y) position
+        """
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.map[y][x] in self.__movements.keys():
+                    return (x, y)
+
+    def move_guard(self) -> bool:
+        """
+        Move guard. Returns False when there are no more valid moves
+        """
+        next_x: int = self.x + self.__x_step
+        next_y: int = self.y + self.__y_step
+        # Check boundaries
+        if (next_x < 0 or next_x >= self.width) or \
+           (next_y < 0 or next_y >= self.height):
+            self.map[self.y][self.x] = "X"
+            return False
+        # Check next character
+        next_char = self.map[next_y][next_x]
+        if next_char == "#": # gira o guarda
+            self.spin_guard()
+        else: # move o guarda
+            self.map[self.y][self.x] = "X"
+            self.x, self.y = self.guard_pos = next_x, next_y
+        # atualiza o cursor
+        self.map[self.y][self.x] = self.cursor
+        return True
+
+    def spin_guard(self) -> None:
+        self.cursor = next(self.__cursor)
+        self.update_movement()
+
+def clear_screen() -> None:
+    if os.name == "nt": # Windows
+        os.system("cls")
+    else: # Linux, MacOS
+        os.system("clear")
+    return
+
+def part1(map: Map) -> int:
     result: int = 0
 
-    for update in updates:
-        # Se estiver na ordem correta, adiciona o valor do meio à soma
-        if correctly_ordered_update(update, rules):
-            mid_value = update[(len(update) - 1) // 2]
-            result += mid_value
+    while True:
+        clear_screen()
+        map.print()
+        print(f"O guarda está em {YELLOW}{map.guard_pos}{RESET} "
+              f"indo para {YELLOW}{map.direction}{RESET}")
+        print()
+        input(f"Pressione {YELLOW}ENTER{RESET} para o próximo movimento...")
+        if not map.move_guard():
+            break
+    clear_screen()
+    map.print()
+    print()
+    print(F"{RED}Não existem mais movimentos possíveis!{RESET}")
     
     return result
 
-def part2(updates: list[list[int]], rules: list[list[int, int]]) -> None:
+def part2(map: Map) -> int:
     result: int = 0
 
-    for update in updates:
-        # Se estiver na ordem incorreta, corrige e adiciona o valor do meio à soma
-        if correctly_ordered_update(update, rules):
-            continue
-        else:
-            correct_update_order(update, rules)
-            mid_value = update[(len(update) - 1) // 2]
-            result += mid_value
-    
     return result
-
-def correctly_ordered_update(update: list[int], rules: list[list[int, int]]) -> bool:
-    for prev_page in range(len(update)):
-        for next_page in range(prev_page + 1, len(update)):
-            if ([update[next_page], update[prev_page]] in rules):
-                return False
-
-    return True
-
-def correct_update_order(update: list[int], rules: list[list[int, int]]) -> tuple[int]:
-    while not correctly_ordered_update(update, rules):
-        for prev_page in range(len(update)):
-            for next_page in range(prev_page + 1, len(update)):
-                if ([update[next_page], update[prev_page]] in rules):
-                    # if incorrect order, swap values
-                    update[next_page], update[prev_page] = update[prev_page], update[next_page]
 
 # ANSI escape codes
 RESET = "\033[0m"
