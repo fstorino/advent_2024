@@ -18,23 +18,17 @@ def main() -> None:
     result_part1: int
     result_part2: int
     
-    # lê o input e gera a lista de regras (rules) e a lista de atualizações (updates)
+    # Lê o input e cria o mapa
     with open(INPUT_FILE) as f:
         map = Map(f.read().splitlines())
     
-    part1(map)
+    result_part1 = part1(map)
+    print(f"Distinct positions visited: {BOLD}{GREEN}{result_part1:n}{RESET} ({result_part1})\n")
+
+    #result_part2 = part2(updates, rules)
+    #print(f"Soma incorretos: {BOLD}{GREEN}{result_part2:n}{RESET} ({result_part2})")   
 
     return
-
-    print()
-    print(f"Regras:  {YELLOW}{len(rules):n}{RESET}")
-    print(f"Updates: {YELLOW}{len(updates):n}{RESET}\n")
-    
-    result_part1 = part1(updates, rules)
-    print(f"Soma corretos: {BOLD}{GREEN}{result_part1:n}{RESET} ({result_part1})\n")
-    
-    result_part2 = part2(updates, rules)
-    print(f"Soma incorretos: {BOLD}{GREEN}{result_part2:n}{RESET} ({result_part2})")   
 
 class Map():
     def __init__(self, input: list[str]) -> None:
@@ -45,7 +39,6 @@ class Map():
         # initialize variables
         self.x: int; self.y: int
         self.guard_pos: tuple[int, int]
-        self.__directions = "<^>v"
         self.__movements = {
         "<": {"x_step": -1,
               "y_step": 0,
@@ -59,6 +52,7 @@ class Map():
         "v": {"x_step": 0,
               "y_step": 1,
               "direction": "baixo"}}
+        self.__directions = list(self.__movements.keys())
         # set properties
         self.width: int = len(self.map[0])
         self.height: int = len(self.map)
@@ -67,11 +61,17 @@ class Map():
         self.update_movement()
 
     def update_movement(self):
-        if not self.cursor: # inicializa as variáveis de cursor
+        """
+        Update the guard movement variables
+        """
+        # inicializa as variáveis de cursor
+        if not self.cursor:
             self.cursor = self.map[self.y][self.x]
             self.__cursor = it.islice(it.cycle(self.__directions), 
                                       self.__directions.index(self.cursor),
                                       None)
+            next(self.__cursor)
+        # atualiza as variáveis de direção e movimento
         self.direction: str = self.__movements[self.cursor]["direction"]
         self.__x_step: int = self.__movements[self.cursor]["x_step"]
         self.__y_step: int = self.__movements[self.cursor]["y_step"]
@@ -138,7 +138,7 @@ class Map():
         """
         for y in range(self.height):
             for x in range(self.width):
-                if self.map[y][x] in self.__movements.keys():
+                if self.map[y][x] in self.__directions:
                     return (x, y)
 
     def move_guard(self) -> bool:
@@ -159,13 +159,19 @@ class Map():
         else: # move o guarda
             self.map[self.y][self.x] = "X"
             self.x, self.y = self.guard_pos = next_x, next_y
-        # atualiza o cursor
+        # Redesenha o cursor
         self.map[self.y][self.x] = self.cursor
         return True
 
     def spin_guard(self) -> None:
         self.cursor = next(self.__cursor)
         self.update_movement()
+
+    def count_visited(self) -> int:
+        """
+        Count the visited squares
+        """
+        return sum([line.count("X") for line in self.map])
 
 def clear_screen() -> None:
     if os.name == "nt": # Windows
@@ -177,19 +183,11 @@ def clear_screen() -> None:
 def part1(map: Map) -> int:
     result: int = 0
 
-    while True:
-        clear_screen()
-        map.print()
-        print(f"O guarda está em {YELLOW}{map.guard_pos}{RESET} "
-              f"indo para {YELLOW}{map.direction}{RESET}")
-        print()
-        input(f"Pressione {YELLOW}ENTER{RESET} para o próximo movimento...")
-        if not map.move_guard():
-            break
-    clear_screen()
-    map.print()
-    print()
-    print(F"{RED}Não existem mais movimentos possíveis!{RESET}")
+    # Move guard until no more moves available
+    while map.move_guard():
+        pass
+    # Count visited squares
+    result = sum([line.count("X") for line in map.map])
     
     return result
 
